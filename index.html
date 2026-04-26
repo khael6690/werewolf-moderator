@@ -584,7 +584,7 @@ function saveCard() {
   players.push({ id: index, name: pName, role, status: 'alive' });
   const card = document.getElementById(`card-${index}`);
   card.classList.add('picked');
-  card.innerHTML = `<span class="check-icon">✅</span><div style="font-size:1.5rem;">${info.emoji}</div><div class="card-sub" style="color:#86efac;">${pName}</div>`;
+  card.innerHTML = `<span class="check-icon">✅</span><div style="font-size:1.5rem;">👤</div><div class="card-sub" style="color:#86efac;">${pName}</div>`;
   pickedCount++;
   updateDistProgress();
   if (pickedCount === totalPlayers) document.getElementById('btn-start-game').classList.remove('d-none');
@@ -812,4 +812,4 @@ function showSurvivors() {
 }
 </script>
 </body>
-                </html>
+</html>
