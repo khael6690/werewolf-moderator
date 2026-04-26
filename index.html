@@ -541,15 +541,20 @@ function updateDistProgress() {
 // --- MODAL KARTU ---
 function openCardModal(index, role) {
   if (document.getElementById(`card-${index}`).classList.contains('picked')) return;
-  document.getElementById('modal-player-name').value = '';
+  // Reset semua elemen modal ke kondisi awal
+  const nameInput = document.getElementById('modal-player-name');
+  nameInput.value = '';
+  nameInput.style.display = '';
+  nameInput.style.borderColor = '';
   document.getElementById('modal-role-reveal').classList.add('d-none');
   document.getElementById('modal-input-section').classList.remove('d-none');
+  document.getElementById('modal-input-section').querySelector('p').style.display = '';
   document.getElementById('btn-reveal').classList.remove('d-none');
   document.getElementById('btn-save-role').classList.add('d-none');
   document.getElementById('modal-card-index').value = index;
   document.getElementById('modal-card-role').value = role;
   roleModal.show();
-  setTimeout(() => document.getElementById('modal-player-name').focus(), 500);
+  setTimeout(() => nameInput.focus(), 500);
 }
 
 function revealRole() {
@@ -807,4 +812,4 @@ function showSurvivors() {
 }
 </script>
 </body>
-</html>
+                </html>
