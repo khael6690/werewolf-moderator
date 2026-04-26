@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Werewolf Moderator</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0d0f14;
+    --bg-card: #161b22;
+    --bg-card2: #1c2330;
+    --border-c: #30363d;
+    --gold: #f0c040;
+    --red: #e05252;
+    --green: #3fb950;
+    --blue: #58a6ff;
+    --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg-deep);
+    color: #e6edf3;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header-banner {
+    background: linear-gradient(135deg, #1a0a2e 0%, #0d1117 50%, #1a0a0a 100%);
+    border-bottom: 1px solid #3d1f1f;
+    padding: 18px 20px 14px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center top, rgba(200,50,50,0.12) 0%, transparent 70%);
+  }
+  .header-banner h1 {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(240,192,64,0.4);
+    margin: 0;
+  }
+  .header-banner p { color: #8b949e; font-size: 0.82rem; margin: 4px 0 0; }
+
+  /* SECTION TITLE */
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1rem; font-weight: 700; color: #8b949e;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-c);
+    padding-bottom: 10px; margin-bottom: 16px;
+  }
+  .section-title span.icon { font-size: 1.3rem; }
+
+  /* CARDS */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-c);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 700px;
+  }
+
+  /* SETUP INPUTS */
+  .form-control {
+    background: #0d1117 !important;
+    color: #e6edf3 !important;
+    border: 1px solid var(--border-c) !important;
+    border-radius: 8px;
+  }
+  .form-control:focus { border-color: var(--blue) !important; box-shadow: 0 0 0 3px rgba(88,166,255,0.15) !important; }
+  .form-label { color: #8b949e; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ROLE INPUT GRID */
+  .role-input-card {
+    background: var(--bg-card2);
+    border: 1px solid var(--border-c);
+    border-radius: 10px;
+    padding: 12px 10px 8px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .role-input-card:hover { border-color: var(--blue); }
+  .role-input-card .role-emoji { font-size: 2rem; display: block; margin-bottom: 4px; }
+  .role-input-card .role-name { font-size: 0.7rem; font-weight: 700; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .role-input-card input { text-align: center; padding: 4px 8px; font-size: 1.1rem; font-weight: 700; }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: linear-gradient(135deg, #1f6feb, #388bfd) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-success { background: linear-gradient(135deg, #1a7f37, #2ea043) !important; border: none !important; border-radius: 8px !important; font-weight: 700 !important; }
+  .btn-danger { background: linear-gradient(135deg, #b91c1c, #dc2626) !important; border: none !important; border-radius: 8px !important; font-weight: 700 !important; }
+  .btn-warning { background: linear-gradient(135deg, #b45309, #d97706) !important; border: none !important; border-radius: 8px !important; font-weight: 700 !important; color: white !important; }
+  .btn-secondary { background: #21262d !important; border: 1px solid var(--border-c) !important; border-radius: 8px !important; font-weight: 600 !important; color: #e6edf3 !important; }
+
+  /* DISTRIBUTION CARDS */
+  .dist-card {
+    background: var(--bg-card2);
+    border: 2px solid var(--border-c);
+    border-radius: 10px;
+    aspect-ratio: 3/4;
+    max-height: 130px;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 0.85rem; color: #8b949e;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .dist-card:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); background: #1f2937; }
+  .dist-card.picked { background: #0f2a1a; border-color: var(--green); color: var(--green); cursor: default; transform: none; }
+  .dist-card.picked:hover { transform: none; border-color: var(--green); }
+  .dist-card .card-num { font-size: 1.5rem; font-weight: 800; }
+  .dist-card .card-sub { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
+  .dist-card .check-icon { position: absolute; top: 6px; right: 8px; font-size: 1rem; }
+
+  /* PLAYER CARDS (NIGHT / DAY) */
+  .player-card {
+    background: var(--bg-card2);
+    border: 2px solid var(--border-c);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 70px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .player-card:hover:not(.dead) { border-color: var(--blue); transform: translateY(-2px); }
+  .player-card.selected { border-color: var(--gold) !important; background: #2a2000 !important; box-shadow: 0 0 12px rgba(240,192,64,0.25); }
+  .player-card.dead { background: #1a0505 !important; border-color: #3d1515 !important; color: #6b3333 !important; cursor: not-allowed; }
+  .player-card.dead .pname { text-decoration: line-through; }
+  .player-card .pname { font-weight: 700; font-size: 0.9rem; }
+  .player-card .prole-badge { font-size: 0.65rem; margin-top: 4px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.08); }
+
+  /* NIGHT PHASE */
+  .night-bg {
+    background: linear-gradient(135deg, #080d18 0%, #0d1117 100%);
+    border: 1px solid #1a2744;
+    border-radius: 12px;
+  }
+  .phase-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 20px;
+    font-weight: 800; font-size: 1.1rem; letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .phase-badge.night { background: rgba(88,130,255,0.15); border: 1px solid #1e3a5f; color: var(--blue); }
+  .phase-badge.day { background: rgba(240,192,64,0.12); border: 1px solid #4a3a00; color: var(--gold); }
+  .phase-badge.danger { background: rgba(220,50,50,0.15); border: 1px solid #5f1e1e; color: var(--red); }
+
+  .narasi-box {
+    background: var(--bg-card2);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    color: #c9d1d9;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .narasi-box.danger { border-left-color: var(--red); }
+  .narasi-box.success { border-left-color: var(--green); }
+  .narasi-box.gold { border-left-color: var(--gold); }
+
+  .seer-result-box {
+    border-radius: 10px; padding: 14px; text-align: center;
+    font-weight: 700; font-size: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+  .seer-result-box.wolf { background: rgba(220,50,50,0.2); border: 1px solid #dc2626; color: #fca5a5; }
+  .seer-result-box.good { background: rgba(63,185,80,0.15); border: 1px solid #3fb950; color: #86efac; }
+
+  /* DAY PHASE */
+  .day-announce {
+    border-radius: 10px; padding: 14px 16px;
+    font-size: 0.9rem; line-height: 1.6;
+  }
+  .day-announce.dead { background: rgba(220,50,50,0.1); border: 1px solid #5f1e1e; }
+  .day-announce.safe { background: rgba(63,185,80,0.1); border: 1px solid #1a4a20; }
+
+  /* SCOREBOARD */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+  }
+  .status-pill.alive { background: rgba(63,185,80,0.15); border: 1px solid #3fb950; color: #3fb950; }
+  .status-pill.wolves { background: rgba(220,50,50,0.15); border: 1px solid #dc2626; color: #f87171; }
+
+  /* MODALS */
+  .modal-content {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-c) !important;
+    border-radius: 14px !important;
+    color: #e6edf3 !important;
+  }
+  .modal-header, .modal-footer { border-color: var(--border-c) !important; }
+  .role-reveal-big { font-size: 3.5rem; animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ROLE COLORS */
+  .role-ww { color: #f87171; }
+  .role-good { color: #86efac; }
+  .role-special { color: var(--purple); }
+
+  /* GAME OVER */
+  .gameover-overlay {
+    text-align: center; padding: 30px 20px;
+  }
+  .gameover-overlay .big-emoji { font-size: 5rem; animation: pop 0.5s ease; }
+
+  /* PROGRESS BAR */
+  .progress-row { display: flex; gap: 4px; margin-bottom: 16px; }
+  .progress-dot {
+    flex: 1; height: 4px; border-radius: 2px; background: var(--border-c);
+    transition: background 0.3s;
+  }
+  .progress-dot.done { background: var(--blue); }
+  .progress-dot.active { background: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .panel { padding: 14px; }
+    .dist-card { max-height: 100px; }
+    .dist-card .card-num { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header-banner">
+  <h1>🐺 WEREWOLF</h1>
+  <p>Moderator Control Dashboard</p>
+</div>
+
+<div class="container-fluid px-3 py-3" style="max-width:740px; margin:0 auto;">
+
+<!-- SCREEN: SETUP -->
+<div id="screen-setup">
+  <div class="panel">
+    <div class="section-title"><span class="icon">⚙️</span> Setup Permainan</div>
+    <div class="mb-3">
+      <label class="form-label">Total Pemain</label>
+      <input type="number" id="input-total" class="form-control" value="12" min="4" max="30">
+    </div>
+    <div class="section-title mt-3"><span class="icon">🃏</span> Jumlah Peran</div>
+    <div class="row g-2 mb-4">
+      <div class="col-4 col-sm-2">
+        <div class="role-input-card">
+          <span class="role-emoji">👤</span>
+          <div class="role-name">Warga</div>
+          <input type="number" id="role-warga" class="form-control" value="8" min="0">
+        </div>
+      </div>
+      <div class="col-4 col-sm-2">
+        <div class="role-input-card">
+          <span class="role-emoji">🐺</span>
+          <div class="role-name">Werewolf</div>
+          <input type="number" id="role-ww" class="form-control" value="2" min="0">
+        </div>
+      </div>
+      <div class="col-4 col-sm-2">
+        <div class="role-input-card">
+          <span class="role-emoji">🔮</span>
+          <div class="role-name">Peramal</div>
+          <input type="number" id="role-peramal" class="form-control" value="1" min="0">
+        </div>
+      </div>
+      <div class="col-4 col-sm-2">
+        <div class="role-input-card">
+          <span class="role-emoji">💉</span>
+          <div class="role-name">Dokter</div>
+          <input type="number" id="role-dokter" class="form-control" value="1" min="0">
+        </div>
+      </div>
+      <div class="col-4 col-sm-2">
+        <div class="role-input-card">
+          <span class="role-emoji">🏹</span>
+          <div class="role-name">Hunter</div>
+          <input type="number" id="role-hunter" class="form-control" value="0" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="narasi-box">
+      <strong>📖 Cara Bermain Singkat:</strong><br>
+      Setiap malam, <strong>Werewolf</strong> memilih korban secara diam-diam. <strong>Dokter</strong> bisa menyelamatkan satu orang. <strong>Peramal</strong> bisa mengintip identitas seseorang. Siang hari, semua pemain berdiskusi dan voting siapa yang akan dieksekusi. Warga menang jika semua Werewolf terbunuh. Werewolf menang jika jumlah mereka menyamai warga.
+    </div>
+
+    <div id="setup-error" class="alert alert-danger d-none py-2 small"></div>
+    <button class="btn btn-primary w-100 py-2" onclick="generateCards()">🎲 Generate & Acak Kartu</button>
+  </div>
+</div>
+
+<!-- SCREEN: DISTRIBUSI -->
+<div id="screen-dist" class="d-none">
+  <div class="panel">
+    <div class="section-title"><span class="icon">🃏</span> Distribusi Peran</div>
+    <div class="narasi-box mb-3">
+      Ketuk kartu → isi nama → klik <strong>"Tampilkan Role"</strong> → perlihatkan sebentar ke pemain → klik <strong>"Sembunyikan"</strong>. Ulangi untuk semua kartu.
+    </div>
+    <div id="dist-progress" class="text-center mb-3" style="color:#8b949e; font-size:0.82rem;"></div>
+    <div class="row g-2" id="card-container"></div>
+    <button class="btn btn-success mt-3 w-100 py-2 d-none fw-bold" id="btn-start-game" onclick="startNightPhase()">
+      ✅ Semua Siap — Mulai Malam Pertama
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN: MALAM -->
+<div id="screen-night" class="d-none">
+  <div class="panel night-bg">
+    <div id="night-phase-badge" class="phase-badge night">🌙 Fase Malam</div>
+    <div id="night-title" class="fw-bold mb-1" style="font-size:1.2rem;"></div>
+    <div id="night-narasi" class="narasi-box"></div>
+    <div id="seer-result" class="d-none seer-result-box mb-3"></div>
+    <div class="row g-2 mb-3" id="night-players-grid"></div>
+    <button class="btn btn-primary w-100 py-2 fw-bold" id="btn-next-night" onclick="nextNightStep()">Lanjut ➔</button>
+  </div>
+  <div class="panel mt-3" id="night-status-bar">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span id="status-alive" class="status-pill alive">✅ 0 Hidup</span>
+      <span id="status-wolves" class="status-pill wolves">🐺 0 Werewolf</span>
+      <span id="status-dead" class="status-pill" style="background:rgba(255,255,255,0.05); border:1px solid #30363d; color:#8b949e;">💀 0 Mati</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: PAGI -->
+<div id="screen-day" class="d-none">
+  <div class="panel">
+    <div class="phase-badge day">☀️ Fase Siang</div>
+    <div id="day-announcement" class="day-announce mb-3 mt-2"></div>
+
+    <div class="section-title"><span class="icon">🗳️</span> Sesi Voting</div>
+    <div class="narasi-box gold mb-3">
+      Semua pemain berdiskusi dan berargumen. Klik nama pemain yang <strong>disepakati forum</strong> untuk dieksekusi. Perhatikan siapa yang berperilaku mencurigakan!
+    </div>
+    <div class="row g-2 mb-3" id="day-players-grid"></div>
+    <button class="btn btn-secondary w-100 py-2 fw-bold" onclick="startNightPhase()">🌙 Akhiri Siang → Mulai Malam</button>
+  </div>
+  <div class="panel mt-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span id="day-status-alive" class="status-pill alive">✅ 0 Hidup</span>
+      <span id="day-status-wolves" class="status-pill wolves">🐺 0 Werewolf</span>
+      <span id="day-status-dead" class="status-pill" style="background:rgba(255,255,255,0.05); border:1px solid #30363d; color:#8b949e;">💀 0 Mati</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- MODAL: ROLE REVEAL -->
+<div class="modal fade" id="roleModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">📝 Daftarkan Pemain</h5>
+      </div>
+      <div class="modal-body text-center px-4 pb-2">
+        <div id="modal-input-section">
+          <p class="text-secondary mb-2" style="font-size:0.85rem;">Minta pemain menyebutkan namanya, lalu ketik di bawah:</p>
+          <input type="text" id="modal-player-name" class="form-control mb-3" placeholder="Nama pemain..." autocomplete="off" style="text-align:center; font-size:1.1rem; font-weight:700;">
+          <input type="hidden" id="modal-card-index">
+          <input type="hidden" id="modal-card-role">
+          <button class="btn btn-primary w-100 py-2" id="btn-reveal" onclick="revealRole()">👁️ Tampilkan Role ke Pemain</button>
+        </div>
+
+        <div id="modal-role-reveal" class="d-none mt-2">
+          <div class="role-reveal-big" id="modal-role-emoji">👤</div>
+          <div class="fw-bold mt-2" style="font-size:0.8rem; color:#8b949e; text-transform:uppercase; letter-spacing:1px;">Role kamu adalah</div>
+          <div class="fw-bold mt-1" id="modal-role-text" style="font-size:2rem;"></div>
+          <div class="mt-2 mb-3" id="modal-role-desc" style="font-size:0.82rem; color:#8b949e; line-height:1.5;"></div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-card" onclick="cancelCard()">✖ Batal</button>
+        <button type="button" class="btn btn-success d-none" id="btn-save-role" onclick="saveCard()">🔒 Sembunyikan & Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VOTE CONFIRM -->
+<div class="modal fade" id="voteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center p-4">
+        <div style="font-size:3rem;">⚖️</div>
+        <h5 class="mt-2 mb-1">Eksekusi Pemain</h5>
+        <p class="text-secondary mb-3" style="font-size:0.88rem;">Warga telah sepakat untuk menggantung:</p>
+        <div class="fw-bold mb-1" style="font-size:1.5rem; color:var(--gold);" id="vote-target-name"></div>
+        <input type="hidden" id="vote-target-id">
+        <p class="text-secondary mt-2" style="font-size:0.8rem;">Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="d-flex gap-2 mt-3">
+          <button type="button" class="btn btn-secondary w-50" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-danger w-50 fw-bold" onclick="executeVote()">⚖️ Eksekusi!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GAME OVER -->
+<div class="modal fade" id="gameOverModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body gameover-overlay">
+        <div class="big-emoji" id="go-emoji">🎉</div>
+        <h3 class="mt-3 fw-bold" id="go-title"></h3>
+        <p class="mt-2" id="go-desc" style="color:#8b949e; font-size:0.9rem;"></p>
+        <div id="go-survivors" class="mt-3 mb-4"></div>
+        <button class="btn btn-primary w-100 py-2 fw-bold" onclick="location.reload()">🔄 Main Lagi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// --- ROLE CONFIG ---
+const ROLE_INFO = {
+  'Warga': {
+    emoji: '👤',
+    color: '#86efac',
+    desc: 'Kamu hanyalah seorang warga desa biasa. Gunakan logika dan intuisimu untuk menemukan Werewolf di antara kalian!'
+  },
+  'Werewolf': {
+    emoji: '🐺',
+    color: '#f87171',
+    desc: 'Kamu adalah Werewolf! Setiap malam, koordinasikan dengan sesama Werewolf untuk memilih korban. Siang hari, berlakulah seperti warga biasa!'
+  },
+  'Peramal': {
+    emoji: '🔮',
+    color: '#bc8cff',
+    desc: 'Setiap malam kamu bisa mengintip identitas SATU pemain. Gunakan informasi ini dengan bijak — mengungkap dirimu berisiko besar!'
+  },
+  'Dokter': {
+    emoji: '💉',
+    color: '#93c5fd',
+    desc: 'Setiap malam kamu bisa menyelamatkan satu pemain (boleh dirimu sendiri) dari serangan Werewolf. Pilihlah dengan cerdas!'
+  },
+  'Hunter': {
+    emoji: '🏹',
+    color: '#fcd34d',
+    desc: 'Kamu adalah Hunter! Jika kamu terbunuh (malam atau siang), kamu bisa membawa SATU pemain mati bersamamu. Peluru terakhirmu sangat berharga!'
+  }
+};
+
+// --- STATE ---
+let totalPlayers = 0, rolesDeck = [], players = [], pickedCount = 0;
+let currentStepIndex = 0;
+let nightActions = { killId: null, healId: null, hunterKillId: null };
+let hunterPending = false, hunterKilledByVote = false;
+const nightSteps = ['werewolf', 'dokter', 'peramal', 'hunter_revenge'];
+
+// Modals
+const roleModal = new bootstrap.Modal(document.getElementById('roleModal'));
+const voteModal = new bootstrap.Modal(document.getElementById('voteModal'));
+const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+
+// --- HELPERS ---
+function updateStatusBars() {
+  const alive = players.filter(p => p.status === 'alive').length;
+  const wolves = players.filter(p => p.status === 'alive' && p.role === 'Werewolf').length;
+  const dead = players.filter(p => p.status === 'dead').length;
+  ['', 'day-'].forEach(pref => {
+    const a = document.getElementById(pref + 'status-alive');
+    const w = document.getElementById(pref + 'status-wolves');
+    const d = document.getElementById(pref + 'status-dead');
+    if (a) a.textContent = `✅ ${alive} Hidup`;
+    if (w) w.textContent = `🐺 ${wolves} WW`;
+    if (d) d.textContent = `💀 ${dead} Mati`;
+  });
+}
+
+// --- 1. SETUP ---
+function generateCards() {
+  totalPlayers = parseInt(document.getElementById('input-total').value);
+  let cWarga = +document.getElementById('role-warga').value || 0;
+  let cWw = +document.getElementById('role-ww').value || 0;
+  let cPeramal = +document.getElementById('role-peramal').value || 0;
+  let cDokter = +document.getElementById('role-dokter').value || 0;
+  let cHunter = +document.getElementById('role-hunter').value || 0;
+  const errEl = document.getElementById('setup-error');
+
+  if (cWw < 1) { errEl.classList.remove('d-none'); errEl.textContent = '⚠️ Minimal 1 Werewolf!'; return; }
+  if ((cWarga + cWw + cPeramal + cDokter + cHunter) !== totalPlayers) {
+    errEl.classList.remove('d-none');
+    errEl.textContent = `⚠️ Total role (${cWarga+cWw+cPeramal+cDokter+cHunter}) tidak sama dengan jumlah pemain (${totalPlayers})!`;
+    return;
+  }
+  errEl.classList.add('d-none');
+
+  rolesDeck = [
+    ...Array(cWarga).fill('Warga'), ...Array(cWw).fill('Werewolf'),
+    ...Array(cPeramal).fill('Peramal'), ...Array(cDokter).fill('Dokter'),
+    ...Array(cHunter).fill('Hunter')
+  ];
+  rolesDeck.sort(() => Math.random() - 0.5);
+
+  document.getElementById('screen-setup').classList.add('d-none');
+  document.getElementById('screen-dist').classList.remove('d-none');
+
+  let container = document.getElementById('card-container');
+  container.innerHTML = '';
+  players = []; pickedCount = 0;
+  updateDistProgress();
+
+  rolesDeck.forEach((role, i) => {
+    container.innerHTML += `
+      <div class="col-4 col-sm-3">
+        <div class="dist-card" id="card-${i}" onclick="openCardModal(${i}, '${role}')">
+          <div class="card-num">${i+1}</div>
+          <div class="card-sub">Kartu ${i+1}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function updateDistProgress() {
+  const el = document.getElementById('dist-progress');
+  if (el) el.textContent = `${pickedCount} / ${totalPlayers} pemain terdaftar`;
+}
+
+// --- MODAL KARTU ---
+function openCardModal(index, role) {
+  if (document.getElementById(`card-${index}`).classList.contains('picked')) return;
+  document.getElementById('modal-player-name').value = '';
+  document.getElementById('modal-role-reveal').classList.add('d-none');
+  document.getElementById('modal-input-section').classList.remove('d-none');
+  document.getElementById('btn-reveal').classList.remove('d-none');
+  document.getElementById('btn-save-role').classList.add('d-none');
+  document.getElementById('modal-card-index').value = index;
+  document.getElementById('modal-card-role').value = role;
+  roleModal.show();
+  setTimeout(() => document.getElementById('modal-player-name').focus(), 500);
+}
+
+function revealRole() {
+  const pName = document.getElementById('modal-player-name').value.trim();
+  if (!pName) { document.getElementById('modal-player-name').focus(); document.getElementById('modal-player-name').style.borderColor = '#dc2626'; return; }
+  document.getElementById('modal-player-name').style.borderColor = '';
+  const role = document.getElementById('modal-card-role').value;
+  const info = ROLE_INFO[role] || { emoji: '❓', desc: '', color: '#fff' };
+  document.getElementById('modal-role-emoji').textContent = info.emoji;
+  document.getElementById('modal-role-text').textContent = role;
+  document.getElementById('modal-role-text').style.color = info.color;
+  document.getElementById('modal-role-desc').textContent = info.desc;
+  document.getElementById('modal-role-reveal').classList.remove('d-none');
+  document.getElementById('btn-reveal').classList.add('d-none');
+  document.getElementById('modal-input-section').querySelector('p').style.display='none';
+  document.getElementById('modal-player-name').style.display='none';
+  document.getElementById('btn-save-role').classList.remove('d-none');
+}
+
+function cancelCard() {}
+
+function saveCard() {
+  const index = +document.getElementById('modal-card-index').value;
+  const role = document.getElementById('modal-card-role').value;
+  const pName = document.getElementById('modal-player-name').value.trim();
+  const info = ROLE_INFO[role] || { emoji: '❓' };
+  players.push({ id: index, name: pName, role, status: 'alive' });
+  const card = document.getElementById(`card-${index}`);
+  card.classList.add('picked');
+  card.innerHTML = `<span class="check-icon">✅</span><div style="font-size:1.5rem;">${info.emoji}</div><div class="card-sub" style="color:#86efac;">${pName}</div>`;
+  pickedCount++;
+  updateDistProgress();
+  if (pickedCount === totalPlayers) document.getElementById('btn-start-game').classList.remove('d-none');
+  roleModal.hide();
+}
+
+// --- 2. FASE MALAM ---
+function startNightPhase() {
+  ['screen-dist','screen-day'].forEach(id => document.getElementById(id).classList.add('d-none'));
+  document.getElementById('screen-night').classList.remove('d-none');
+  nightActions = { killId: null, healId: null, hunterKillId: null };
+  hunterPending = false; hunterKilledByVote = false;
+  currentStepIndex = 0;
+  renderNightStep();
+  updateStatusBars();
+}
+
+function renderNightStep() {
+  const step = nightSteps[currentStepIndex];
+  const titleEl = document.getElementById('night-title');
+  const narasiEl = document.getElementById('night-narasi');
+  const gridEl = document.getElementById('night-players-grid');
+  const seerEl = document.getElementById('seer-result');
+  const btnEl = document.getElementById('btn-next-night');
+  const badgeEl = document.getElementById('night-phase-badge');
+
+  gridEl.innerHTML = '';
+  seerEl.classList.add('d-none');
+
+  if (step === 'werewolf') {
+    badgeEl.className = 'phase-badge night';
+    badgeEl.innerHTML = '🌙 Fase Malam';
+    titleEl.innerHTML = `🐺 <span style="color:#f87171;">Giliran Werewolf</span>`;
+    narasiEl.className = 'narasi-box danger';
+    narasiEl.innerHTML = `<strong>📢 Moderator:</strong> "Semua warga, pejamkan mata dan tidur... Werewolf, buka mata kalian." <br><br>Persilakan Werewolf saling melihat, lalu <strong>tunjukkan target malam ini</strong> secara diam-diam. Klik nama target di bawah.`;
+    btnEl.textContent = 'Selesai, Lanjut ➔';
+    players.forEach(p => {
+      if (p.status === 'alive') gridEl.innerHTML += buildPCard(p, nightActions.killId === p.id, `selAct('kill',${p.id})`, p.role === 'Werewolf');
+    });
+  } else if (step === 'dokter') {
+    titleEl.innerHTML = `💉 <span style="color:#93c5fd;">Giliran Dokter</span>`;
+    narasiEl.className = 'narasi-box';
+    narasiEl.innerHTML = `<strong>📢 Moderator:</strong> "Werewolf, tutup mata. Dokter, buka mata." <br><br>Dokter menunjuk siapa yang ingin <strong>diselamatkan</strong> malam ini (boleh diri sendiri). Klik nama pilihan Dokter.`;
+    btnEl.textContent = hasDokter() ? 'Selesai, Lanjut ➔' : 'Lewati (Tidak Ada Dokter) ➔';
+    players.forEach(p => {
+      if (p.status === 'alive') gridEl.innerHTML += buildPCard(p, nightActions.healId === p.id, `selAct('heal',${p.id})`, false);
+    });
+  } else if (step === 'peramal') {
+    titleEl.innerHTML = `🔮 <span style="color:#bc8cff;">Giliran Peramal</span>`;
+    narasiEl.className = 'narasi-box';
+    narasiEl.innerHTML = `<strong>📢 Moderator:</strong> "Dokter, tutup mata. Peramal, buka mata." <br><br>Peramal menunjuk <strong>satu pemain</strong> yang ingin diintip identitasnya. Klik nama tersebut — hasilnya hanya terlihat oleh moderator, lalu angguk atau gelengkan kepala ke Peramal.`;
+    btnEl.textContent = hasSeer() ? 'Semua Tidur, Proses Malam ➔' : 'Lewati (Tidak Ada Peramal), Proses Malam ➔';
+    players.forEach(p => {
+      if (p.status === 'alive') gridEl.innerHTML += buildPCard(p, false, `checkSeer(${p.id})`, false);
+    });
+  } else if (step === 'hunter_revenge') {
+    badgeEl.className = 'phase-badge danger';
+    badgeEl.innerHTML = '🏹 Hunter Terbunuh!';
+    titleEl.innerHTML = `🏹 <span style="color:#fcd34d;">Pembalasan Hunter</span>`;
+    narasiEl.className = 'narasi-box gold';
+    narasiEl.innerHTML = `<strong>⚠️ Khusus Hunter!</strong> Hunter telah terbunuh. <br><br>Bangunkan Hunter dan bisikkan: <em>"Kamu terbunuh, tapi kamu bisa membawa satu orang bersamamu."</em> Hunter menunjuk targetnya dengan diam-diam. Klik nama target Hunter di bawah.`;
+    btnEl.textContent = '🏹 Eksekusi Peluru Hunter ➔';
+    players.forEach(p => {
+      if (p.status === 'alive') gridEl.innerHTML += buildPCard(p, nightActions.hunterKillId === p.id, `selAct('hunter',${p.id})`, false);
+    });
+  }
+}
+
+function buildPCard(p, sel, fn, isWW) {
+  let cls = sel ? 'selected' : '';
+  if (p.status === 'dead') cls = 'dead';
+  const info = ROLE_INFO[p.role] || { emoji: '❓' };
+  const roleShow = p.status === 'dead' ? `<div class="prole-badge">${info.emoji} ${p.role}</div>` : '';
+  const clickable = p.status === 'dead' ? '' : `onclick="${fn}"`;
+  return `<div class="col-6 col-sm-4 col-md-3">
+    <div class="player-card ${cls}" ${clickable}>
+      <div class="pname">${p.name}</div>
+      ${roleShow}
+      ${sel ? '<div style="font-size:0.7rem; color:var(--gold); margin-top:3px;">✦ Dipilih</div>' : ''}
+    </div>
+  </div>`;
+}
+
+function hasDokter() { return players.some(p => p.role === 'Dokter' && p.status === 'alive'); }
+function hasSeer() { return players.some(p => p.role === 'Peramal' && p.status === 'alive'); }
+
+function selAct(type, id) {
+  if (type === 'kill') nightActions.killId = id;
+  if (type === 'heal') nightActions.healId = id;
+  if (type === 'hunter') nightActions.hunterKillId = id;
+  renderNightStep();
+}
+
+function checkSeer(id) {
+  const p = players.find(x => x.id === id);
+  const seerEl = document.getElementById('seer-result');
+  seerEl.classList.remove('d-none', 'wolf', 'good');
+  if (p.role === 'Werewolf') {
+    seerEl.classList.add('wolf');
+    seerEl.innerHTML = `🐺 <strong>YA, WEREWOLF!</strong> — ${p.name} adalah Werewolf.<br><small style="font-weight:400; opacity:0.8;">Anggukkan kepala ke Peramal, lalu minta tutup mata.</small>`;
+  } else {
+    seerEl.classList.add('good');
+    seerEl.innerHTML = `✅ <strong>BUKAN WEREWOLF</strong> — ${p.name} adalah orang baik.<br><small style="font-weight:400; opacity:0.8;">Gelengkan kepala ke Peramal, lalu minta tutup mata.</small>`;
+  }
+}
+
+function nextNightStep() {
+  if (nightSteps[currentStepIndex] === 'peramal') { processNightToDay(); return; }
+  if (nightSteps[currentStepIndex] === 'hunter_revenge') {
+    if (nightActions.hunterKillId !== null) {
+      const pi = players.findIndex(p => p.id === nightActions.hunterKillId);
+      players[pi].status = 'dead';
+    }
+    showDayPhase(null, true); return;
+  }
+  currentStepIndex++;
+  renderNightStep();
+}
+
+// --- 3. TRANSISI ---
+function processNightToDay() {
+  let killed = null;
+  if (nightActions.killId !== null && nightActions.killId !== nightActions.healId) {
+    const pi = players.findIndex(p => p.id === nightActions.killId);
+    players[pi].status = 'dead';
+    killed = players[pi];
+  }
+  if (killed && killed.role === 'Hunter') {
+    document.getElementById('screen-night').classList.remove('d-none');
+    currentStepIndex = 3;
+    renderNightStep();
+  } else {
+    showDayPhase(killed, false);
+  }
+}
+
+// --- 4. PAGI ---
+function showDayPhase(killedNight = null, afterHunter = false) {
+  if (checkWin()) return;
+  document.getElementById('screen-night').classList.add('d-none');
+  document.getElementById('screen-day').classList.remove('d-none');
+
+  const ann = document.getElementById('day-announcement');
+  if (afterHunter) {
+    const hunterVictim = players.find(p => p.id === nightActions.hunterKillId);
+    ann.className = 'day-announce dead';
+    ann.innerHTML = `💀 Malam yang berdarah! Beberapa nyawa melayang — termasuk serangan balasan dari Hunter yang menarik <strong>${hunterVictim ? hunterVictim.name : 'seseorang'}</strong> ke alam kematian.`;
+  } else if (killedNight) {
+    ann.className = 'day-announce dead';
+    ann.innerHTML = `💀 Pagi yang kelam... Warga ditemukan tewas: <strong style="color:var(--gold); font-size:1.1rem;">${killedNight.name}</strong><br><small style="color:#8b949e;">Identitasnya: ${ROLE_INFO[killedNight.role]?.emoji} ${killedNight.role}</small>`;
+  } else {
+    ann.className = 'day-announce safe';
+    ann.innerHTML = `🌅 Pagi yang tenang... Tidak ada korban jiwa semalam. Desa masih utuh!`;
+  }
+  renderDayGrid();
+  updateStatusBars();
+}
+
+function renderDayGrid() {
+  const g = document.getElementById('day-players-grid');
+  g.innerHTML = '';
+  players.forEach(p => {
+    const fn = p.status === 'alive' ? `prepVote(${p.id})` : '';
+    g.innerHTML += buildPCard(p, false, fn, false);
+  });
+}
+
+function prepVote(id) {
+  const p = players.find(x => x.id === id);
+  document.getElementById('vote-target-name').textContent = p.name;
+  document.getElementById('vote-target-id').value = id;
+  voteModal.show();
+}
+
+function executeVote() {
+  const id = +document.getElementById('vote-target-id').value;
+  const p = players.find(x => x.id === id);
+  p.status = 'dead';
+  voteModal.hide();
+  renderDayGrid();
+  updateStatusBars();
+  if (p.role === 'Hunter') {
+    setTimeout(() => {
+      document.getElementById('screen-day').classList.add('d-none');
+      document.getElementById('screen-night').classList.remove('d-none');
+      currentStepIndex = 3;
+      nightActions.hunterKillId = null;
+      renderNightStep();
+    }, 600);
+  } else {
+    setTimeout(() => checkWin(), 500);
+  }
+}
+
+// --- 5. WIN CHECK ---
+function checkWin() {
+  const aliveWW = players.filter(p => p.status === 'alive' && p.role === 'Werewolf').length;
+  const aliveGood = players.filter(p => p.status === 'alive' && p.role !== 'Werewolf').length;
+  const go = document.getElementById;
+
+  if (aliveWW === 0) {
+    document.getElementById('go-emoji').textContent = '🎉';
+    document.getElementById('go-title').innerHTML = '<span style="color:#3fb950;">WARGA MENANG!</span>';
+    document.getElementById('go-desc').textContent = 'Semua Werewolf telah berhasil disingkirkan. Desa aman kembali!';
+    showSurvivors();
+    gameOverModal.show(); return true;
+  }
+  if (aliveWW >= aliveGood) {
+    document.getElementById('go-emoji').textContent = '🐺';
+    document.getElementById('go-title').innerHTML = '<span style="color:#f87171;">WEREWOLF MENANG!</span>';
+    document.getElementById('go-desc').textContent = 'Werewolf kini menguasai desa. Tidak ada harapan yang tersisa...';
+    showSurvivors();
+    gameOverModal.show(); return true;
+  }
+  return false;
+}
+
+function showSurvivors() {
+  const surv = players.filter(p => p.status === 'alive');
+  const info = ROLE_INFO;
+  document.getElementById('go-survivors').innerHTML = surv.length
+    ? `<div style="font-size:0.8rem; color:#8b949e; margin-bottom:8px;">MASIH HIDUP (${surv.length})</div>` +
+      surv.map(p => `<span class="status-pill alive me-1 mb-1">${info[p.role]?.emoji || '❓'} ${p.name}</span>`).join('')
+    : '';
+}
+</script>
+</body>
+</html>
